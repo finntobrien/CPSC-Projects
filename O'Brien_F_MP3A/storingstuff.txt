@@ -1,0 +1,247 @@
+import java.util.LinkedList;
+import java.util.Random;
+
+public class Game {
+    private LinkedList<Player> players;
+    private LinkedList<Card> pile;
+    private Dealer dealer;
+    private String[] patterns;
+
+    // static methods 
+    static boolean topBottom(LinkedList<Card> pile){
+        if (pile.getFirst().getRank() == pile.getLast().getRank()){ 
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    static boolean doubles(LinkedList<Card> pile){
+        int pileSize = pile.size();
+        if (pile.get(pileSize - 1).getRank() == pile.get(pileSize -2).getRank()){ 
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    static boolean sandwhich(LinkedList<Card> pile){
+        int pileSize = pile.size();
+        if (pile.get(pileSize -1).getRank() == pile.get(pileSize -3).getRank()){
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+
+    public LinkedList<Player> getPlayers(){
+        return players;
+    }
+
+    public LinkedList<Card> getPile(){
+        return pile;
+    }
+
+    public Dealer getDealer(){
+        return dealer;
+    }
+
+    public String[] getPatterns(){
+        return patterns;
+    }
+
+    public Game(){
+        players = new LinkedList<>(); //LinkedList<Player>
+        dealer = new Dealer(); //Dealer 
+        pile = new LinkedList<>();//LinkedList<Card> 
+        patterns = new String[3];//String 
+        patterns[0] = "doubles";
+        patterns[1] = "top bottom";
+        patterns[2] = "sandwhich";
+        LinkedList<Card> p1Hand = dealer.deals(26);
+        LinkedList<Card> p2Hand = dealer.deals(26);
+        Player p1 = new Player(1, p1Hand, patterns[0]);
+        Player p2 = new Player(2, p2Hand, patterns[1]);
+        players.add(p1);
+        players.add(p2);
+        
+    }
+
+    Random random = new Random();
+
+    public Game(int s){
+        int playerCount = s;
+        players = new LinkedList<>();
+        dealer = new Dealer();
+        pile = new LinkedList<>();
+        patterns = new String[3];
+        patterns[0] = "doubles";
+        patterns[1] = "top bottom";
+        patterns[2] = "sandwhich";
+        int randomNum = random.nextInt(3);
+        for (int i=1; i < s+1; ++i){
+            Player pi = new Player(i, dealer.deals(52 / s), patterns[randomNum]);
+            players.add(pi);
+        }
+        for(int i = 0; i < 52 % s; ++i){
+            Card e = dealer.deal();
+            pile.add(e);
+        };
+    }
+
+    private Player nextPlayer(Player currentPlayer){
+        int playerCount = players.size();
+        int index = players.indexOf(currentPlayer);
+        Player nextPlayer;
+        if (currentPlayer == null){
+            nextPlayer = players.get(0);
+        } else if (index + 1 == playerCount){
+            nextPlayer = players.get(0);
+        } else{
+            nextPlayer = players.get(index +1);
+        }
+        return nextPlayer;
+
+    }
+
+    public int getLargestHand(){
+        int largestHand = 0;
+       int handCount;
+       for(Player P: players){
+       handCount = P.getHandSize();
+        if(handCount > largestHand){
+            largestHand = handCount;
+        }
+    }
+    return largestHand;
+}
+
+public int getLargestPlayer(){
+    int playerIndex = 0;
+    for(Player p: players){
+        if(p.getHandSize() == 52){
+            playerIndex = p.getPlayerNum();
+            break;
+        }
+    }
+    return playerIndex;
+}
+
+    public int play(){
+       Player nextPlayer;
+       Player lastPlayer;
+        int largestHandCount = getLargestHand();
+        int largestPlayerIndex = getLargestPlayer();
+       while( largestHandCount < 52){
+       while(pile.getLast().getRank() != 11 && pile.getLast().getRank() != 12 && pile.getLast().getRank() != 13 && pile.getLast().getRank() != 14 ){
+        nextPlayer = nextPlayer(lastPlayer);
+        Card C = nextPlayer.playCard();
+        pile.add(C);
+        lastPlayer = nextPlayer;
+       } if(pile.getLast().getRank() == 11){
+            nextPlayer = nextPlayer(lastPlayer);
+            Card C = nextPlayer.playCard();
+            pile.add(C);
+                if (pile.getLast().getRank() == 11 || pile.getLast().getRank() == 12 || pile.getLast().getRank() == 13 || pile.getLast().getRank() == 14){
+                play();
+        } else{
+                int index = players.indexOf(lastPlayer);
+                players.get(index).addPile(pile);
+                play();
+
+            }
+        } else if(pile.getLast().getRank() == 12){
+            nextPlayer = nextPlayer(lastPlayer);
+            Card C = nextPlayer.playCard();
+            pile.add(C);
+                if(pile.getLast().getRank() == 11 || pile.getLast().getRank() == 12 || pile.getLast().getRank() == 13 || pile.getLast().getRank() == 14){
+                    play();
+                } else{
+                    Card G = nextPlayer.playCard();
+                    pile.add(G);
+                        if(pile.getLast().getRank() == 11 || pile.getLast().getRank() == 12 || pile.getLast().getRank() == 13 || pile.getLast().getRank() == 14){
+                    play();
+                } else{
+                    int index = players.indexOf(lastPlayer);
+                    players.get(index).addPile(pile);
+                    play();
+                }
+                }
+        } else if(pile.getLast().getRank() == 13){
+            nextPlayer = nextPlayer(lastPlayer);
+            Card C = nextPlayer.playCard();
+            pile.add(C);
+                if(pile.getLast().getRank() == 11 || pile.getLast().getRank() == 12 || pile.getLast().getRank() == 13 || pile.getLast().getRank() == 14){
+                    play();
+                } else{
+                    Card G = nextPlayer.playCard();
+                    pile.add(G);
+                    if(pile.getLast().getRank() == 11 || pile.getLast().getRank() == 12 || pile.getLast().getRank() == 13 || pile.getLast().getRank() == 14){
+                        play();
+                    } else{
+                        Card E = nextPlayer.playCard();
+                        pile.add(E);
+                        if(pile.getLast().getRank() == 11 || pile.getLast().getRank() == 12 || pile.getLast().getRank() == 13 || pile.getLast().getRank() == 14){
+                            play();
+                        } else{
+                            int index = players.indexOf(lastPlayer);
+                            players.get(index).addPile(pile);
+                            play();
+                        }
+                    }
+
+
+                }
+        } else if(pile.getLast().getRank() == 14){
+            nextPlayer = nextPlayer(lastPlayer);
+            Card C = nextPlayer.playCard();
+            pile.add(C);
+                if(pile.getLast().getRank() == 11 || pile.getLast().getRank() == 12 || pile.getLast().getRank() == 13 || pile.getLast().getRank() == 14){
+                    play();
+                } else{
+                    Card G = nextPlayer.playCard();
+                    pile.add(G);
+                    if(pile.getLast().getRank() == 11 || pile.getLast().getRank() == 12 || pile.getLast().getRank() == 13 || pile.getLast().getRank() == 14){
+                        play();
+                    } else{
+                        Card E = nextPlayer.playCard();
+                        pile.add(E);
+                        if(pile.getLast().getRank() == 11 || pile.getLast().getRank() == 12 || pile.getLast().getRank() == 13 || pile.getLast().getRank() == 14){
+                            play();
+                        } else{
+                            Card F = nextPlayer.playCard();
+                            pile.add(F);
+                            if(pile.getLast().getRank() == 11 || pile.getLast().getRank() == 12 || pile.getLast().getRank() == 13 || pile.getLast().getRank() == 14){
+                                play();
+                            }else{
+                                int index = players.indexOf(lastPlayer);
+                            players.get(index).addPile(pile);}
+                            play();
+                        }
+                    }
+
+
+                }
+        }
+    }
+return largestPlayerIndex;}
+    
+
+    public String toString(){
+        String s = "";
+        s+= "Players: " + players.toString() + "\n";
+        return s;
+
+    }
+
+
+
+
+
+    }
+
+
+
+    
+
